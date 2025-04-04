@@ -1,3 +1,97 @@
+CREATE DATABASE recruitment_agency;
+
+CREATE SCHEMA agency;
+
+CREATE TABLE IF NOT EXISTS companies (
+    company_ID SERIAL PRIMARY KEY,
+    company_name VARCHAR(255) NOT NULL UNIQUE,
+    company_number VARCHAR(20) NOT NULL UNIQUE, --use varchar FOR numbers but bigint IS ALSO okay
+    company_POC VARCHAR(255),
+    company_email VARCHAR(255) UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS recruiter (
+    recruiter_ID SERIAL PRIMARY KEY,
+    recruiter_name VARCHAR(20) NOT NULL,
+    recruiter_email TEXT NOT NULL UNIQUE,
+    recruiter_number VARCHAR(20) NOT NULL UNIQUE --IN production DATABASE there would be a CHECK CONSTRAINT for validity
+);
+
+CREATE TABLE IF NOT EXISTS  education_information (
+    education_info_ID SERIAL PRIMARY KEY,
+    education_level VARCHAR(50),
+    education_facility VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS candidates (
+    candidate_ID SERIAL PRIMARY KEY,
+    education_info_ID BIGINT REFERENCES education_information(education_info_ID) ON DELETE CASCADE,
+    candidate_name VARCHAR(20) NOT NULL,
+    candidate_surname VARCHAR(20) NOT NULL,
+    candidate_email TEXT NOT NULL UNIQUE, 
+    candidate_number VARCHAR(20) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS skills (
+    skill_ID SERIAL PRIMARY KEY,
+    skill_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS candidate_skill (
+    candidate_skill_ID SERIAL PRIMARY KEY,
+    skill_ID BIGINT REFERENCES skills(skill_ID) ON DELETE CASCADE,
+    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
+    candidate_year_of_exp INT CHECK (candidate_year_of_exp > 0), --adding >0 CONSTRAINT here AND wherever neccesary 
+    certification VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS jobs (
+    job_ID SERIAL PRIMARY KEY,
+    company_ID BIGINT REFERENCES companies(company_ID) ON DELETE CASCADE,
+    recruiter_ID BIGINT REFERENCES recruiter(recruiter_ID) ON DELETE CASCADE,
+    job_descr TEXT NOT NULL,
+    quantity_needed BIGINT NOT NULL DEFAULT 1,
+    job_location VARCHAR(255),
+    salary DECIMAL(10,2) CHECK (salary > 0),
+    posting_date DATE NOT NULL DEFAULT CURRENT_DATE CHECK (posting_date > '2000-01-01'),
+    closing_date DATE CHECK (closing_date > '2000-01-01'),
+    isActive BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS job_skill (
+    job_skill_ID SERIAL PRIMARY KEY, -- added this COLUMN it wasn't previously IN the diagram
+    job_ID BIGINT REFERENCES jobs(job_ID) ON DELETE CASCADE,
+    skill_ID BIGINT REFERENCES skills(skill_ID) ON DELETE CASCADE,
+    isRequired BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS job_application (
+    job_application_ID SERIAL PRIMARY KEY,
+    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
+    job_ID BIGINT REFERENCES jobs(job_ID) ON DELETE CASCADE,
+    application_date DATE NOT NULL DEFAULT CURRENT_DATE CHECK (application_date > '2000-01-01'),
+    application_CV_link TEXT NOT NULL --i use TEXT FOR url but varchar IS ALSO okay
+);
+
+CREATE TABLE IF NOT EXISTS interviews_info (
+    interview_ID SERIAL PRIMARY KEY,
+    job_application_ID BIGINT REFERENCES job_application(job_application_ID) ON DELETE CASCADE,
+    recruiter_ID BIGINT REFERENCES recruiter(recruiter_ID) ON DELETE CASCADE,
+    interview_date DATE NOT NULL CHECK (order_date > '2000-01-01'),
+    interview_location VARCHAR(255),
+    interview_type VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS interview_feedback (
+    feedback_ID SERIAL PRIMARY KEY,
+    interview_ID BIGINT REFERENCES interviews_info(interview_ID) ON DELETE CASCADE,
+    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
+    rating INT CHECK (rating > 0 AND rating < 100) NOT NULL,
+    strengths VARCHAR(50),
+    weaknesses VARCHAR(50)
+);
+
+
 INSERT INTO agency.education_information
 (education_level, education_facility) VALUES
 ('high school','number 32 public school'),
@@ -140,97 +234,3 @@ FROM agency.candidate_skill
 UNION ALL
 SELECT 'job_skill', count(*), count(CASE WHEN record_ts IS NOT NULL THEN 1 END)
 FROM agency.job_skill;
-
-
-CREATE DATABASE recruitment_agency;
-
-CREATE SCHEMA agency;
-
-CREATE TABLE IF NOT EXISTS companies (
-    company_ID SERIAL PRIMARY KEY,
-    company_name VARCHAR(255) NOT NULL UNIQUE,
-    company_number VARCHAR(20) NOT NULL UNIQUE, --use varchar FOR numbers but bigint IS ALSO okay
-    company_POC VARCHAR(255),
-    company_email VARCHAR(255) UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS recruiter (
-    recruiter_ID SERIAL PRIMARY KEY,
-    recruiter_name VARCHAR(20) NOT NULL,
-    recruiter_email TEXT NOT NULL UNIQUE,
-    recruiter_number VARCHAR(20) NOT NULL UNIQUE --IN production DATABASE there would be a CHECK CONSTRAINT for validity
-);
-
-CREATE TABLE IF NOT EXISTS  education_information (
-    education_info_ID SERIAL PRIMARY KEY,
-    education_level VARCHAR(50),
-    education_facility VARCHAR(50)
-);
-
-CREATE TABLE IF NOT EXISTS candidates (
-    candidate_ID SERIAL PRIMARY KEY,
-    education_info_ID BIGINT REFERENCES education_information(education_info_ID) ON DELETE CASCADE,
-    candidate_name VARCHAR(20) NOT NULL,
-    candidate_surname VARCHAR(20) NOT NULL,
-    candidate_email TEXT NOT NULL UNIQUE, 
-    candidate_number VARCHAR(20) NOT NULL UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS skills (
-    skill_ID SERIAL PRIMARY KEY,
-    skill_name VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS candidate_skill (
-    candidate_skill_ID SERIAL PRIMARY KEY,
-    skill_ID BIGINT REFERENCES skills(skill_ID) ON DELETE CASCADE,
-    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
-    candidate_year_of_exp INT CHECK (candidate_year_of_exp > 0), --adding >0 CONSTRAINT here AND wherever neccesary 
-    certification VARCHAR(50)
-);
-
-CREATE TABLE IF NOT EXISTS jobs (
-    job_ID SERIAL PRIMARY KEY,
-    company_ID BIGINT REFERENCES companies(company_ID) ON DELETE CASCADE,
-    recruiter_ID BIGINT REFERENCES recruiter(recruiter_ID) ON DELETE CASCADE,
-    job_descr TEXT NOT NULL,
-    quantity_needed BIGINT NOT NULL DEFAULT 1,
-    job_location VARCHAR(255),
-    salary DECIMAL(10,2) CHECK (salary > 0),
-    posting_date DATE NOT NULL DEFAULT CURRENT_DATE CHECK (posting_date > '2000-01-01'),
-    closing_date DATE CHECK (closing_date > '2000-01-01'),
-    isActive BOOLEAN DEFAULT TRUE
-);
-
-CREATE TABLE IF NOT EXISTS job_skill (
-    job_skill_ID SERIAL PRIMARY KEY, -- added this COLUMN it wasn't previously IN the diagram
-    job_ID BIGINT REFERENCES jobs(job_ID) ON DELETE CASCADE,
-    skill_ID BIGINT REFERENCES skills(skill_ID) ON DELETE CASCADE,
-    isRequired BOOLEAN DEFAULT TRUE
-);
-
-CREATE TABLE IF NOT EXISTS job_application (
-    job_application_ID SERIAL PRIMARY KEY,
-    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
-    job_ID BIGINT REFERENCES jobs(job_ID) ON DELETE CASCADE,
-    application_date DATE NOT NULL DEFAULT CURRENT_DATE CHECK (application_date > '2000-01-01'),
-    application_CV_link TEXT NOT NULL --i use TEXT FOR url but varchar IS ALSO okay
-);
-
-CREATE TABLE IF NOT EXISTS interviews_info (
-    interview_ID SERIAL PRIMARY KEY,
-    job_application_ID BIGINT REFERENCES job_application(job_application_ID) ON DELETE CASCADE,
-    recruiter_ID BIGINT REFERENCES recruiter(recruiter_ID) ON DELETE CASCADE,
-    interview_date DATE NOT NULL CHECK (order_date > '2000-01-01'),
-    interview_location VARCHAR(255),
-    interview_type VARCHAR(20)
-);
-
-CREATE TABLE IF NOT EXISTS interview_feedback (
-    feedback_ID SERIAL PRIMARY KEY,
-    interview_ID BIGINT REFERENCES interviews_info(interview_ID) ON DELETE CASCADE,
-    candidate_ID BIGINT REFERENCES candidates(candidate_ID) ON DELETE CASCADE,
-    rating INT CHECK (rating > 0 AND rating < 100) NOT NULL,
-    strengths VARCHAR(50),
-    weaknesses VARCHAR(50)
-);
