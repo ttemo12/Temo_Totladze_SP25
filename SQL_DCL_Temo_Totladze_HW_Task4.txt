@@ -1,0 +1,5 @@
+1) grant [permissions to grant] [column or columns to give access to] on table to user; so while giving permission sql allows these permissions on particular columns only if specified so.
+2) user authentication is proof of users identity, whereas user identification is when certain user claims an identity.
+3) SCRAM-SHA-256, Cert , GSSAPI for linux and unix like systems, SSPI for windows, kerberos, LDAP
+4) single DB login to login into the database and then sets its role to his own to get permissions. it reduces the number of direct db users and enforces user specific permissions.
+ 
