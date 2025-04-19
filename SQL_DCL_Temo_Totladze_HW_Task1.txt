@@ -1,0 +1,20 @@
+there are 16 roles in dvdrental db : pg_checkpoint, pg_create_subscription, pg_database_owner, pg_execute_server_program, pg_maintain, pg_monitor, pg_read_all_data, pg_read_all_settings, pg_read_all_stats, pg_read_server_files, pg_signal_backend, pg_stat_scan_tables, pg_use_reserved_connections, pg_write_all_data, pg_write_server_files, postgres 
+these roles except of postgres(superuser) are default pgsql roles and they each have different roles even though their source code was mostly the same. some of them had added permissions as well and some of their permissions were bundle of other roles' permissions.
+
+pg_checkpoint allows the execution of checkpoint cmd, it systematically writes changes to modified data from memory to storage.
+pg_create_subscription allows user to execute create subscription, it allows for the connection of publisher and the subscriber databases, where subscriber database automatically gets the changes from the publisher.
+pg_database_owner has permissions of usage and creation of objects inside the database.
+pg_execute_server_program this role allows the execution of programs outside of the scope of sql, any external program.
+pg_maintain Allows executing of VACUUM, ANALYZE, CLUSTER, REFRESH MATERIALIZED VIEW, REINDEX, and LOCK TABLE , so the tasks that are there for db maintenence 
+pg_monitor this role lets user the ability to read important metrics about the health and performance of the database, but it has no write privilege, it also has pg_read_all_settings, pg_read_all_stats and pg_stat_scan_tables roles as well.
+pg_read_all_data role can read all data, so select statements.
+pg_write_all_data can insert, update, delete.
+pg_read_all_settings can read all config variables.
+pg_read_all_stats this role can read statistics from views that are there to check db activity and performance.
+pg_read_server_files gives user read-only access to server files.
+pg_signal_backend allows user ability to signal backend processes that will cancel a query or terminate a session.
+pg_stat_scan_tables allows the user to be able to see stats of how tables are being accessed 
+pg_use_reserved_connections this role is allowed to connect to db even if maximum number of connections are reached.
+pg_write_all_data role can insert, update, delete.
+pg_write_server_files allows to write server files.
+postgres is a superuser.
