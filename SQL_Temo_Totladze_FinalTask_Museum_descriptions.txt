@@ -1,0 +1,82 @@
+This database manages the operations of a museum, including artifacts, staff, visitors, exhibitions, locations, payments, and donations.
+
+1)locations
+    stores different areas inside the museum
+        l_id: PK (auto increment)
+        l_name: name of the location
+        l_floor: floor number where the location is
+
+2)artifacts
+    stores information about museum artifacts
+        a_id: PK (auto increment)
+        a_name: artifact name
+        a_origin: origin country or region of the artifact
+        a_condition: Condition status (Excellent, Good, Fair, Poor, Fragile)
+
+3)staff
+    stores staff member information
+        s_id: PK (auto increment)
+        s_name: staff name 
+        s_namechar: Staff first name
+        s_surname: Staff last name
+        s_mail: Staff email address (must be unique)
+        s_number: Staff phone number
+
+4)visitors
+    Stores visitor information
+        v_id: PK (auto increment)
+        v_name: Visitor name
+        v_mail: Visitor email (must be unique)
+        v_visiting_date: Date of visiting (defaults to the current date)
+
+
+5)payments
+    records payments made by visitors
+        p_id: PK (auto increment)
+        v_id: visitor ID (foreign key)
+        p_amount: amount paid (must be positive)
+        p_method: payment method (Credit Card, Cash, Mobile Payment)
+        p_date: Payment date (default to current date)
+
+6)exhibitions
+    stores exhibitions organized at the museum
+        e_id: PK (auto increment)
+        s_id: staff in charge (foreign key)
+        l_id: location where the exhibition is held (foreign key)
+        e_name: exhibition name
+        e_start_date: start date of the exhibition (after 2024-01-01)
+        e_end_date: end date of the exhibition (must be after start date)
+
+7)donations
+    stores information about donations made to the museum
+        d_id: PK (auto increment)
+        d_name: name of the donor
+        d_donation_date: date of the donation
+        d_donation_type: type of donation (financial or artificial)
+
+junction tables to deal with many to many relationships, each one of these has PK and 2 integer columns each representing one of the tables.
+
+8)artifacts_exhibitions
+    links artifacts to the exhibitions where they are displayed (an artifact can be displayed in many exhibitions over time, an exhibition can display many artifacts at once)
+
+9)donations_artifacts
+    links donated artifacts to donations (one artifact can have many donators that donated, one donation can include many artifacts)
+
+10)visitors_exhibitions
+    tracks which visitors attended which exhibitions(a visitor can attend many exhibitions over time,an exhibition can have many visitors attending)
+
+11)staff_exhibitions
+    tracks which staff was on which exhibitions(a staff member can work in many exhibitions, an exhibition will need many staff members helping)
+
+
+chk_exhibition_date_min: Exhibition start date must be after 2024-01-01.
+chk_payment_positive: Payment amount must be greater than zero.
+chk_artifact_condition_values: Artifact condition must be one of: Excellent, Good, Fair, Poor, Fragile.
+chk_payment_method_values: Payment method must be one of: Credit Card, Cash, Mobile Payment.
+chk_exhibition_end_after_start: Exhibition end date must be after start date.
+unique_staff_email: Staff emails must be unique. (even though by default mails can not be same as one another)
+unique_visitor_email: Visitor emails must be unique.
+Default date for payments and visits: Defaults to the current date if not specified.
+
+All IDs (l_id, a_id, s_id, v_id, p_id, etc.) are auto-incremented using the GENERATED ALWAYS AS IDENTITY feature.
+The tables are populated via sample data dynamically.
